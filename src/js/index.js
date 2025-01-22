@@ -93,6 +93,10 @@ async function handleStudioClickDesktop() {
 
 function handleStudioClickMobile() {
   if (window.location.pathname != "/") {
+    // openOverlay();
+    //// barba.go is bugging on Safari iphone
+    // barba.go("/");
+    // lenisMain.scrollTo("#studio", { duration: 0.5 });
     window.location.href = "/#studio";
   } else {
     hideMenuMobile();
@@ -804,7 +808,6 @@ function homeEmailForm(page) {
   }
 
   homeEmailFormListener = async function (event) {
-    console.log("clicked");
     caption.classList.add("text-color-secondary");
     field.classList.add("text-color-primary");
     gsap.to(formBtn, { opacity: 1, pointerEvents: "auto" });
@@ -966,7 +969,8 @@ barba.init({
   transitions: [
     {
       name: "default-transition",
-      async once() {
+      async once(data) {
+        mainInit(data.next.container);
         setTimeout(() => {
           closeOverlay();
         }, 400);
@@ -993,12 +997,13 @@ barba.init({
 // init functions //
 ////////////////////
 
-function mainInit() {
+function mainInit(page) {
   initLenisMain();
+  closeOverlay();
   contactCaptchaHider();
-  projectPreviewHover(document);
+  projectPreviewHover(page);
   scrollToTopButtons();
-  videos(document);
+  videos(page);
 
   // button handlers
   if (window.innerWidth > 767) {
@@ -1098,9 +1103,3 @@ function workInit(page) {
   window.fsAttributes.cmsfilter.init();
   unwrapFilterBlock(page);
 }
-
-///////////////
-// main body //
-///////////////
-
-document.addEventListener("DOMContentLoaded", mainInit);
