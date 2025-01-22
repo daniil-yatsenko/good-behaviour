@@ -38,7 +38,7 @@ export default defineConfig({
     cors: "*",
     hmr: {},
   },
-  build: configs.darkMode, // toggle between "test" and "main" to build respective files
+  build: configs.main, // toggle between "test" and "main" to build respective files
   envDir: "../",
   resolve: {
     alias: {

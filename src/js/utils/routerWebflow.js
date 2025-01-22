@@ -23,14 +23,17 @@
           // Localhost is available, load Vite's dev scripts
           loadScript("http://localhost:3000/@vite/client", "module", true);
           loadScript("http://localhost:3000/js/index.js", "module", true);
+          console.log("using localhost scripts");
         } else {
           // If localhost is not available, load the staging script
           loadScript("https://XXX/staging-script.js"); // update to staging CDN link
+          console.log("using CDN staging scripts");
         }
       })
       .catch(() => {
         // If localhost is not reachable, load the staging script
         loadScript("https://XXX/staging-script.js"); // update to staging CDN link
+        console.log("using CDN staging scripts");
       });
   }
 })();
