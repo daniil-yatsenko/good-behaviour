@@ -1,9 +1,8 @@
-// code snippet for Webflow router
-// should route between localhost:3000, prod/staging and prod/main
-// make sure to update the CDN links
+// currently in use via Webflow's "Custom code", before </body>
+// routes dev, staging and prod scripts based on localhost:3000 and domain's name
 
 (function () {
-  const head = document.getElementsByTagName("head")[0]; //remember to update to <body> if necessary
+  const body = document.getElementsByTagName("body")[0];
 
   const isWebflow = window.location.hostname.includes("webflow.io");
 
@@ -11,28 +10,30 @@
     const script = document.createElement("script");
     script.src = src;
     script.type = module ? "module" : type;
-    head.appendChild(script);
+    body.appendChild(script);
   }
 
   if (!isWebflow) {
-    loadScript("https://XXX/prod-script.js"); // update to prod CDN link
+    loadScript(
+      "https://cdn.jsdelivr.net/gh/daniil-yatsenko/good-behaviour@main/prod/live/versions/index%401.0.0.js"
+    );
   } else {
-    fetch("http://localhost:3000")
+    fetch("http://localhost:3001")
       .then((response) => {
         if (response.ok) {
-          // Localhost is available, load Vite's dev scripts
-          loadScript("http://localhost:3000/@vite/client", "module", true);
-          loadScript("http://localhost:3000/js/index.js", "module", true);
+          loadScript("http://localhost:3001/js/index.js", "module", true);
           console.log("using localhost scripts");
         } else {
-          // If localhost is not available, load the staging script
-          loadScript("https://XXX/staging-script.js"); // update to staging CDN link
+          loadScript(
+            "https://cdn.jsdelivr.net/gh/daniil-yatsenko/good-behaviour@main/prod/staging/versions/index%401.0.0.js"
+          );
           console.log("using CDN staging scripts");
         }
       })
       .catch(() => {
-        // If localhost is not reachable, load the staging script
-        loadScript("https://XXX/staging-script.js"); // update to staging CDN link
+        loadScript(
+          "https://cdn.jsdelivr.net/gh/daniil-yatsenko/good-behaviour@main/prod/staging/versions/index%401.0.0.js"
+        );
         console.log("using CDN staging scripts");
       });
   }
