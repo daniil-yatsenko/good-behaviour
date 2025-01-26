@@ -19,7 +19,7 @@ function colorModeToggle() {
   let colorModeDuration = 0.4;
   let colorModeEase = "power2.inOut";
   const cssVariables =
-    "background-primary,text-primary,text-secondary,link-primary,navbar";
+    "background-primary,text-primary,text-secondary,link-primary,navbar,quote";
 
   let lightColors = {};
   let darkColors = {};
