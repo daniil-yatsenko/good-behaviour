@@ -286,20 +286,6 @@ function hideMenuMobile() {
   }
 }
 
-function contactCaptchaHider() {
-  const field = document.querySelector(".overlay_contact-form_input-field");
-  const captcha = document.querySelector(
-    ".overlay_contact-form_captcha-wrapper"
-  );
-
-  if (captcha && field) {
-    field.addEventListener("focus", () => {
-      gsap.set(captcha, { opacity: 0, display: "block" });
-      gsap.to(captcha, { opacity: 1 });
-    });
-  }
-}
-
 function unwrap(element) {
   const parent = element.parentNode;
   while (element.firstChild) {
@@ -573,13 +559,16 @@ function navbarFilterAdjustments(page = document) {
 }
 
 let projectsForHover = null;
-function projectPreviewHover(page) {
+function thumbnailHover(page) {
   if (window.innerWidth > 992) {
     if (projectsForHover) {
       projectsForHover = null;
     }
-    projectsForHover = page.querySelectorAll(
-      ".project-preview_wrapper, .image-wrapper .is-article-thumbnail"
+
+    projectsForHover = page.querySelectorAll(".project-preview_wrapper");
+
+    let articlesForHover = page.querySelectorAll(
+      ".image-wrapper.is-article-thumbnail"
     );
 
     projectsForHover.forEach((project) => {
@@ -593,6 +582,15 @@ function projectPreviewHover(page) {
       project.addEventListener("mouseout", () => {
         gsap.to(title, { opacity: 0 });
         gsap.to([visual.children], { scale: 1 });
+      });
+    });
+
+    articlesForHover.forEach((article) => {
+      article.addEventListener("mouseover", () => {
+        gsap.to(article.firstElementChild, { scale: 1.015 });
+      });
+      article.addEventListener("mouseout", () => {
+        gsap.to(article.firstElementChild, { scale: 1 });
       });
     });
   }
@@ -843,28 +841,44 @@ function mobileHomeLogoAnimation() {
   window.addEventListener("scroll", mobileHomeLogoEvent);
 }
 
-let homeEmailFormListener;
-function homeEmailForm(page) {
-  const formBlock = page.querySelector(".home_email-form-block");
-  const caption = formBlock.querySelector(".home_email-form_caption");
-  const field = formBlock.querySelector(".home_email-form_field");
-  const formBtn = formBlock.querySelector(".home_email-form_button");
-  const captcha = document.querySelector(".home_email-form_captcha-hider");
+function contactCaptchaHider() {
+  const field = document.querySelector(".overlay_contact-form_input-field");
+  const captcha = document.querySelector(
+    ".overlay_contact-form_captcha-wrapper"
+  );
 
-  if (homeEmailFormListener) {
-    field.removeEventListener("focus", homeEmailFormListener);
+  if (captcha && field) {
+    field.addEventListener("focus", () => {
+      gsap.set(captcha, { opacity: 0, display: "block" });
+      gsap.to(captcha, { opacity: 1 });
+    });
   }
+}
 
-  homeEmailFormListener = async function (event) {
-    console.log("clicked");
-    caption.classList.add("text-color-secondary");
-    field.classList.add("text-color-primary");
-    gsap.to(formBtn, { opacity: 1, pointerEvents: "auto" });
-    gsap.set(captcha, { opacity: 0, pointerEvents: "auto" });
-    gsap.to(captcha, { opacity: 1 });
-  };
+function emailFormsCapthaInit(page) {
+  const forms = page.querySelectorAll(".email-form-wrapper");
 
-  field.addEventListener("focus", homeEmailFormListener);
+  forms.forEach((form) => {
+    const field = form.querySelector(".email-form_field");
+    const button = form.querySelector(".email-form_button");
+    const captcha = form.querySelector(".email-form_captcha-hider");
+    const caption = form.querySelector(".email-form_caption");
+
+    let formEventListener = async function (event) {
+      caption.classList.add("text-color-secondary");
+      field.classList.add("text-color-primary");
+      gsap.to(button, { opacity: 1, pointerEvents: "auto" });
+      gsap.set(captcha, {
+        opacity: 0,
+        pointerEvents: "auto",
+        display: "block",
+      });
+      gsap.to(captcha, { opacity: 1 });
+    };
+
+    field.removeEventListener("focus", formEventListener);
+    field.addEventListener("focus", formEventListener);
+  });
 }
 
 // handle dropdown functionality
@@ -1045,7 +1059,6 @@ barba.init({
       afterEnter(data) {
         selectedClients();
         mobileHomeLogoAnimation();
-        homeEmailForm(data.next.container);
       },
       async beforeLeave() {
         clearInterval(selectedClientsLoop);
@@ -1135,7 +1148,8 @@ barba.init({
         navbarPageTitleMobile();
       },
       afterEnter(data) {
-        projectPreviewHover(data.next.container);
+        emailFormsCapthaInit(data.next.container);
+        thumbnailHover(data.next.container);
         videosInit(data.next.container);
         scrollToTopButtons();
         closeOverlay();
@@ -1153,11 +1167,12 @@ barba.init({
 ////////////////////
 
 function mainInit(page) {
+  contactCaptchaHider(page);
+  emailFormsCapthaInit(page);
   initLenisMain();
   unhideLinks();
   closeOverlay();
-  contactCaptchaHider();
-  projectPreviewHover(page);
+  thumbnailHover(page);
   scrollToTopButtons();
   videosInit(page);
   navbarPageTitleMobile();
