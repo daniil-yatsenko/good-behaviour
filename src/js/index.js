@@ -1047,6 +1047,22 @@ function anchorScrollOffset(page) {
   });
 }
 
+function captchaRestart(page) {
+  // each captcha should have a unique ID
+  const captcha = page.querySelector(".g-recaptcha");
+
+  if (captcha) {
+    const captchaId = captcha.getAttribute("id");
+    try {
+      grecaptcha.render(captchaId, {
+        sitekey: "6LeLEmMqAAAAAPjmEnSIGuAzoDGwpDbkAm1ubiYE",
+      });
+    } catch (error) {
+      console.error("Error rendering reCAPTCHA:", error);
+    }
+  }
+}
+
 ///////////
 // barba //
 ///////////
@@ -1152,6 +1168,7 @@ barba.init({
         thumbnailHover(data.next.container);
         videosInit(data.next.container);
         scrollToTopButtons();
+        captchaRestart(data.next.container);
         closeOverlay();
       },
       afterLeave(data) {
