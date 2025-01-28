@@ -3,6 +3,7 @@ import Lenis from "lenis";
 import Player from "@vimeo/player";
 import barba from "@barba/core";
 import { videosInit, videosCleanup } from "./components/vimeo";
+import { componentsInit, componentsCleanup } from "./components/index";
 
 // gsap defaults
 gsap.defaults({
@@ -558,44 +559,6 @@ function navbarFilterAdjustments(page = document) {
   }
 }
 
-let projectsForHover = null;
-function thumbnailHover(page) {
-  if (window.innerWidth > 992) {
-    if (projectsForHover) {
-      projectsForHover = null;
-    }
-
-    projectsForHover = page.querySelectorAll(".project-preview_wrapper");
-
-    let articlesForHover = page.querySelectorAll(
-      ".image-wrapper.is-article-thumbnail"
-    );
-
-    projectsForHover.forEach((project) => {
-      let visual = project.querySelector(".project-preview_visual");
-      let title = project.querySelector(".project-preview_caption");
-      gsap.to(title, { opacity: 0 });
-      project.addEventListener("mouseover", () => {
-        gsap.to(title, { opacity: 1 });
-        gsap.to([visual.children], { scale: 1.015 });
-      });
-      project.addEventListener("mouseout", () => {
-        gsap.to(title, { opacity: 0 });
-        gsap.to([visual.children], { scale: 1 });
-      });
-    });
-
-    articlesForHover.forEach((article) => {
-      article.addEventListener("mouseover", () => {
-        gsap.to(article.firstElementChild, { scale: 1.015 });
-      });
-      article.addEventListener("mouseout", () => {
-        gsap.to(article.firstElementChild, { scale: 1 });
-      });
-    });
-  }
-}
-
 // Vimeo video functionality via Player SDK
 let vimeoVideoContainers = null;
 function videos(page) {
@@ -853,32 +816,6 @@ function contactCaptchaHider() {
       gsap.to(captcha, { opacity: 1 });
     });
   }
-}
-
-function emailFormsCapthaInit(page) {
-  const forms = page.querySelectorAll(".email-form-wrapper");
-
-  forms.forEach((form) => {
-    const field = form.querySelector(".email-form_field");
-    const button = form.querySelector(".email-form_button");
-    const captcha = form.querySelector(".email-form_captcha-hider");
-    const caption = form.querySelector(".email-form_caption");
-
-    let formEventListener = async function (event) {
-      caption.classList.add("text-color-secondary");
-      field.classList.add("text-color-primary");
-      gsap.to(button, { opacity: 1, pointerEvents: "auto" });
-      gsap.set(captcha, {
-        opacity: 0,
-        pointerEvents: "auto",
-        display: "block",
-      });
-      gsap.to(captcha, { opacity: 1 });
-    };
-
-    field.removeEventListener("focus", formEventListener);
-    field.addEventListener("focus", formEventListener);
-  });
 }
 
 // handle dropdown functionality
@@ -1164,16 +1101,14 @@ barba.init({
         navbarPageTitleMobile();
       },
       afterEnter(data) {
-        emailFormsCapthaInit(data.next.container);
-        thumbnailHover(data.next.container);
-        videosInit(data.next.container);
+        componentsInit(data.next.container);
+
         scrollToTopButtons();
-        captchaRestart(data.next.container);
         closeOverlay();
       },
       afterLeave(data) {
+        componentsCleanup(data.current.container);
         navbarPageTitleMobile();
-        videosCleanup(data.current.container);
       },
     },
   ],
@@ -1184,14 +1119,13 @@ barba.init({
 ////////////////////
 
 function mainInit(page) {
+  componentsInit(page);
+
   contactCaptchaHider(page);
-  emailFormsCapthaInit(page);
   initLenisMain();
   unhideLinks();
   closeOverlay();
-  thumbnailHover(page);
   scrollToTopButtons();
-  videosInit(page);
   navbarPageTitleMobile();
 
   // button handlers
