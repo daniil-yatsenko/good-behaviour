@@ -66,7 +66,6 @@ const thumbnailsInit = (page) => {
       thumbnail.addEventListener("mouseout", hoverOutListener);
     });
   }
-  console.log("thumbs initiated");
 };
 
 const thumbnailsCleanup = (page) => {
@@ -95,7 +94,6 @@ const thumbnailsCleanup = (page) => {
       eventListenersMap.delete(thumbnail);
     }
   });
-  console.log("thumbs cleaned up");
 };
 
 export { thumbnailsInit, thumbnailsCleanup };

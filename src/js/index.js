@@ -1,9 +1,9 @@
 import { gsap } from "gsap";
 import Lenis from "lenis";
-import Player from "@vimeo/player";
 import barba from "@barba/core";
-import { videosInit, videosCleanup } from "./components/vimeo";
 import { componentsInit, componentsCleanup } from "./components/index";
+import { navbarDirTitleMobile } from "./components/navbar";
+import { articleInit } from "./pages/article";
 
 // gsap defaults
 gsap.defaults({
@@ -32,6 +32,7 @@ cssVariables.split(",").forEach(function (item) {
 // utility & animation functions //
 ///////////////////////////////////
 
+// once refactored, use in "pages/article.js"
 var lenisMain;
 function initLenisMain() {
   if (lenisMain) {
@@ -264,6 +265,7 @@ function showMenuMobile() {
   }
 }
 
+// uses navbarPageTitleMobile / navbarDirTitleMobile, has to be imported during refactoring;
 function hideMenuMobile() {
   const menu = document.querySelector(".overlay_mobile-menu-wrapper");
   const button = document.querySelector(".navbar_menu-button-wrapper");
@@ -273,7 +275,7 @@ function hideMenuMobile() {
     return;
   } else {
     return new Promise((resolve) => {
-      navbarPageTitleMobile();
+      navbarDirTitleMobile();
 
       const tl = gsap.timeline();
 
@@ -335,94 +337,6 @@ function unwrap(element) {
 //     });
 //   });
 // }
-
-function navbarPageTitleMobile() {
-  if (window.innerWidth > 768) return;
-
-  function showCaption() {
-    gsap.set(captionArea, { display: "block", opacity: 0 });
-    gsap.to(captionArea, { opacity: 1, delay: 0.1 });
-  }
-
-  function hideCaption() {
-    gsap.to(captionArea, {
-      opacity: 0,
-      onComplete: () => {
-        gsap.set(captionArea, { display: "none" });
-      },
-    });
-  }
-
-  function checkVisibility() {
-    if (window.getComputedStyle(captionArea).display == "block") {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  const captionArea = document.querySelector(".navbar_mobile-caption-wrapper");
-  const captionLink = captionArea.querySelector(
-    ".navbar_mobile-directory-link-wrapper"
-  );
-
-  let shouldBeVisible = false;
-  let slug = "";
-  let visibleDirectories = [
-    {
-      name: "work",
-      slug: "/work",
-      navText: "Work",
-    },
-    {
-      name: "projects",
-      slug: "/projects",
-      navText: "Work",
-      dirLink: "/work",
-    },
-    {
-      name: "founders",
-      slug: "/what-we-do",
-      navText: "What We Do",
-    },
-    {
-      name: "journal",
-      slug: "/journal",
-      navText: "Journal",
-    },
-  ];
-
-  // check if block should be visible
-  visibleDirectories.forEach((page) => {
-    if (window.location.pathname.includes(page.slug)) {
-      slug = page.slug;
-      shouldBeVisible = true;
-      captionLink.innerHTML = page.navText;
-      if (page.dirLink) captionLink.href = page.dirLink;
-      else captionLink.href = slug;
-    }
-  });
-
-  // check if navText has to be grey
-
-  if (shouldBeVisible && window.location.pathname.endsWith(slug)) {
-    captionArea.firstChild.classList.add("text-color-secondary");
-    captionLink.href = "#";
-  } else {
-    captionArea.firstChild.classList.remove("text-color-secondary");
-  }
-
-  // toggle visibility
-  if (shouldBeVisible == checkVisibility()) {
-    return;
-  } else {
-    if (shouldBeVisible == false) {
-      hideCaption();
-    } else {
-      showCaption();
-    }
-  }
-}
 
 // color styling for filter blocks
 function filterAdjustment(page) {
@@ -557,91 +471,6 @@ function navbarFilterAdjustments(page = document) {
     let adjustedHeight = topPanel.clientHeight + navbar.clientHeight;
     gsap.set(navbar, { height: adjustedHeight });
   }
-}
-
-// Vimeo video functionality via Player SDK
-let vimeoVideoContainers = null;
-function videos(page) {
-  if (vimeoVideoContainers) {
-    vimeoVideoContainers = null;
-  }
-  vimeoVideoContainers = page.querySelectorAll(".video-wrapper");
-
-  vimeoVideoContainers.forEach((videoContainer) => {
-    let vimeoId = videoContainer.getAttribute("vimeo_id");
-    if (window.innerWidth < 992)
-      vimeoId = videoContainer.getAttribute("vimeo_id_mobile");
-    if (!vimeoId) {
-      return;
-    }
-
-    let containerRatio =
-      videoContainer.offsetWidth / videoContainer.offsetHeight;
-
-    let settings = {
-      id: vimeoId,
-      width: videoContainer.offsetWidth,
-      height: videoContainer.offsetHeight,
-      quality: "1080p",
-      background: true,
-      dnt: true, // Prevent the player from tracking session data
-    };
-
-    let player = new Player(videoContainer.firstElementChild, settings);
-
-    player.setQuality("1080p");
-
-    function resizePlayer() {
-      let newContainerRatio =
-        videoContainer.offsetWidth / videoContainer.offsetHeight;
-
-      // Resize the player accordingly
-      player.element.width = videoContainer.offsetWidth;
-      player.element.height = videoContainer.offsetHeight;
-
-      // Scale video to fit properly on resize
-      Promise.all([player.getVideoWidth(), player.getVideoHeight()]).then(
-        function (dimensions) {
-          let vimeoRatio = dimensions[0] / dimensions[1];
-          if (vimeoRatio > newContainerRatio) {
-            gsap.set(videoContainer.firstElementChild, {
-              scale: vimeoRatio / newContainerRatio + 0.01,
-            });
-          } else if (vimeoRatio < newContainerRatio) {
-            gsap.set(videoContainer.firstElementChild, {
-              scale: newContainerRatio / vimeoRatio + 0.01,
-            });
-          }
-        }
-      );
-    }
-
-    // Add resize event listener with debounce
-    let resizeTimeout;
-    window.addEventListener("resize", () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(resizePlayer, 100);
-    });
-
-    player.on("play", () => {
-      // Initial video scale on play
-      Promise.all([player.getVideoWidth(), player.getVideoHeight()]).then(
-        function (dimensions) {
-          let vimeoRatio = dimensions[0] / dimensions[1];
-          if (vimeoRatio > containerRatio) {
-            gsap.set(videoContainer.firstElementChild, {
-              scale: vimeoRatio / containerRatio + 0.01,
-            });
-          } else if (vimeoRatio < containerRatio) {
-            gsap.set(videoContainer.firstElementChild, {
-              scale: containerRatio / vimeoRatio + 0.01,
-            });
-          }
-        }
-      );
-      gsap.to(videoContainer, { opacity: 1 });
-    });
-  });
 }
 
 function scrollToTopButtons() {
@@ -938,30 +767,6 @@ function readTime() {
   }
 }
 
-// unhide hidden links in staging
-function unhideLinks() {
-  if (window.location.hostname.includes("goodbehaviour.work")) {
-    return;
-  }
-
-  const desktopLinks = document.querySelectorAll(".navbar_nav-link");
-  const mobileLinks = document.querySelectorAll(
-    ".overlay_mobile-menu .text-style-no-underline"
-  );
-
-  desktopLinks.forEach((link) => {
-    if (link.classList.contains("hide")) {
-      link.classList.remove("hide");
-    }
-  });
-
-  mobileLinks.forEach((link) => {
-    if (link.classList.contains("hide")) {
-      link.classList.remove("hide");
-    }
-  });
-}
-
 function anchorScrollOffset(page) {
   const navbar = document.querySelector(".navbar_navbar");
   let offset = 0;
@@ -984,20 +789,28 @@ function anchorScrollOffset(page) {
   });
 }
 
-function captchaRestart(page) {
-  // each captcha should have a unique ID
-  const captcha = page.querySelector(".g-recaptcha");
-
-  if (captcha) {
-    const captchaId = captcha.getAttribute("id");
-    try {
-      grecaptcha.render(captchaId, {
-        sitekey: "6LeLEmMqAAAAAPjmEnSIGuAzoDGwpDbkAm1ubiYE",
-      });
-    } catch (error) {
-      console.error("Error rendering reCAPTCHA:", error);
-    }
+// unhide hidden links in staging
+function unhideLinks() {
+  if (window.location.hostname.includes("goodbehaviour.work")) {
+    return;
   }
+
+  const desktopLinks = document.querySelectorAll(".navbar_nav-link");
+  const mobileLinks = document.querySelectorAll(
+    ".overlay_mobile-menu .text-style-no-underline"
+  );
+
+  desktopLinks.forEach((link) => {
+    if (link.classList.contains("hide")) {
+      link.classList.remove("hide");
+    }
+  });
+
+  mobileLinks.forEach((link) => {
+    if (link.classList.contains("hide")) {
+      link.classList.remove("hide");
+    }
+  });
 }
 
 ///////////
@@ -1057,9 +870,10 @@ barba.init({
     {
       namespace: "article",
       afterEnter(data) {
-        initCopyLink();
-        readTime();
-        anchorScrollOffset(data.next.container);
+        // initCopyLink();
+        // readTime();
+        // anchorScrollOffset(data.next.container);
+        articleInit(data.next.container);
         filterBlockOnScroll(data.next.container);
       },
       beforeLeave() {
@@ -1098,7 +912,6 @@ barba.init({
       async beforeEnter() {
         initLenisMain();
         await lenisMain.scrollTo(0, { immediate: true });
-        navbarPageTitleMobile();
       },
       afterEnter(data) {
         componentsInit(data.next.container);
@@ -1108,7 +921,6 @@ barba.init({
       },
       afterLeave(data) {
         componentsCleanup(data.current.container);
-        navbarPageTitleMobile();
       },
     },
   ],
@@ -1126,7 +938,6 @@ function mainInit(page) {
   unhideLinks();
   closeOverlay();
   scrollToTopButtons();
-  navbarPageTitleMobile();
 
   // button handlers
   if (window.innerWidth > 767) {
