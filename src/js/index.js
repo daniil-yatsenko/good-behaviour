@@ -935,7 +935,7 @@ function mainInit(page) {
 
   contactCaptchaHider(page);
   initLenisMain();
-  // unhideLinks();
+  unhideLinks();
   closeOverlay();
   scrollToTopButtons();
 

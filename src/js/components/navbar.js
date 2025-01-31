@@ -58,7 +58,7 @@ const navbarDirTitleMobile = () => {
     {
       name: "journal",
       slug: "/journal",
-      navText: "Journal",
+      navText: "Notes",
     },
   ];
 
