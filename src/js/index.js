@@ -32,7 +32,8 @@ cssVariables.split(",").forEach(function (item) {
 // utility & animation functions //
 ///////////////////////////////////
 
-// once refactored, use in "pages/article.js"
+// add to globalInit once its resady;
+// then, update to use in "pages/article.js"
 var lenisMain;
 function initLenisMain() {
   if (lenisMain) {
@@ -717,7 +718,6 @@ function animateDropdowns() {
       let dropdownToggle = dropdown.querySelector(".dropdown_dropdown-toggle");
 
       dropdownToggle.addEventListener("click", () => {
-        console.log("dropdown click");
         // if it was opened before
         if (dropdown.classList.contains("is-opened")) {
           closeDropdown(dropdown);
@@ -935,7 +935,7 @@ function mainInit(page) {
 
   contactCaptchaHider(page);
   initLenisMain();
-  unhideLinks();
+  // unhideLinks();
   closeOverlay();
   scrollToTopButtons();
 

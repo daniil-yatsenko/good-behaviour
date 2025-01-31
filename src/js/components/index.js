@@ -10,12 +10,12 @@ export const componentsInit = (page) => {
   captchaRestart(page);
   thumbnailsInit(page);
   navbarDirTitleMobile();
-  console.log("components init");
+  // console.log("components init");
 };
 
 export const componentsCleanup = (page) => {
   videosCleanup(page);
   thumbnailsCleanup(page);
   navbarDirTitleMobile();
-  console.log("components cleanup");
+  // console.log("components cleanup");
 };
